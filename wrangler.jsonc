@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "locked-in",
+  "workers_dev": true,
+  "preview_urls": false,
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "locked-in" }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "locked-in-db",
+      "database_id": "5a09aaec-fa5f-4ee8-9f70-43357173f907",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "vars": { "BETTER_AUTH_URL": "https://locked-in.needle7.workers.dev" },
+  "observability": { "enabled": true },
+}

@@ -4,30 +4,42 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build && node scripts/build-sw.mjs",
-    "preview": "vite preview --host 0.0.0.0",
+    "dev": "next dev --hostname 0.0.0.0 --port 5173",
+    "build": "next build --webpack",
+    "start": "opennextjs-cloudflare preview --port 5173",
+    "build:cloudflare": "opennextjs-cloudflare build",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview --port 5173",
+    "deploy": "npm run build:cloudflare && npm run db:remote && opennextjs-cloudflare deploy",
+    "db:local": "wrangler d1 migrations apply locked-in-db --local",
+    "db:remote": "wrangler d1 migrations apply locked-in-db --remote",
+    "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
-    "art": "node scripts/build-vault.mjs",
-    "test:ui": "playwright test"
+    "test:ui": "playwright test",
+    "setup": "node scripts/setup-local.mjs"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "1.20.15",
     "@radix-ui/react-dialog": "^1.1.15",
-    "@tailwindcss/vite": "^4.1.0",
-    "clsx": "^2.1.1",
+    "better-auth": "1.7.14",
+    "drizzle-orm": "latest",
     "lucide-react": "^0.468.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "tailwind-merge": "^3.3.0",
-    "tailwindcss": "^4.1.0"
+    "next": "16.4.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@cloudflare/workers-types": "latest",
     "@playwright/test": "^1.55.0",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0",
-    "@vitejs/plugin-react": "^4.5.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "esbuild": "^0.28.2",
     "typescript": "~5.8.3",
-    "vite": "^6.3.0"
+    "wrangler": "4.156.0"
+  },
+  "overrides": {
+    "glob": "14.0.3"
   }
 }

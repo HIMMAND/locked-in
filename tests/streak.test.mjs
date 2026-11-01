@@ -1,40 +1,35 @@
-import test from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  dayKey,
-  previousDay,
-  currentStreak,
-  recordCheckin,
-} from "../src/streak.mjs";
-const today = new Date(2026, 10, 1, 12);
-test("daily keys use the user’s local calendar and cross month boundaries", () => {
-  assert.equal(dayKey(today), "2026-11-01");
-  assert.equal(previousDay(today), "2026-10-31");
-  assert.equal(previousDay(new Date(2027, 0, 1, 0, 1)), "2026-12-31");
+import { addDays, dayInZone, streakStats } from "../src/lib/streak.mjs";
+
+test("crew timezone decides the day across midnight and DST", () => {
+  const instant = new Date("2026-11-01T02:30:00Z");
+  assert.equal(dayInZone("Asia/Dubai", instant), "2026-11-01");
+  assert.equal(dayInZone("America/New_York", instant), "2026-10-31");
+  assert.equal(addDays("2026-11-01", -1), "2026-10-31");
+  assert.equal(addDays("2028-02-28", 1), "2028-02-29");
 });
-test("consecutive check-in increments exactly once", () => {
-  const state = { lastDay: "2026-10-31", streak: 6, best: 14 };
-  const next = recordCheckin(state, today);
-  assert.equal(next.streak, 7);
-  assert.equal(next.best, 14);
-  assert.equal(recordCheckin(next, today), next);
-});
-test("a missed day starts a fresh streak while preserving the best", () => {
-  const state = { lastDay: "2026-10-29", streak: 6, best: 14 };
-  assert.equal(currentStreak(state, today), 0);
-  assert.deepEqual(recordCheckin(state, today), {
-    lastDay: "2026-11-01",
-    streak: 1,
-    best: 14,
+test("empty accounts start at zero with no sample history", () => {
+  assert.deepEqual(streakStats([], "2026-11-01"), {
+    current: 0,
+    best: 0,
+    total: 0,
+    checkedIn: false,
   });
 });
-test("new users start at one, and new records update the best", () => {
-  assert.equal(
-    recordCheckin({ lastDay: "", streak: 0, best: 0 }, today).streak,
-    1,
+test("yesterday carries a streak until today ends; duplicates do not count", () => {
+  assert.deepEqual(
+    streakStats(["2026-10-30", "2026-10-31", "2026-10-31"], "2026-11-01"),
+    { current: 2, best: 2, total: 2, checkedIn: false },
+  );
+});
+test("a missed day resets current streak while retaining personal best", () => {
+  assert.deepEqual(
+    streakStats(["2026-10-28", "2026-10-29", "2026-11-01"], "2026-11-01"),
+    { current: 1, best: 2, total: 3, checkedIn: true },
   );
   assert.equal(
-    recordCheckin({ lastDay: "2026-10-31", streak: 14, best: 14 }, today).best,
-    15,
+    streakStats(["2026-10-28", "2026-10-29"], "2026-11-01").current,
+    0,
   );
 });

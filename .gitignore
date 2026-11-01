@@ -7,3 +7,8 @@ artifacts/
 playwright-report/
 test-results/
 .agents/
+.next/
+.open-next/
+.wrangler/
+.dev.vars*
+next-env.d.ts
